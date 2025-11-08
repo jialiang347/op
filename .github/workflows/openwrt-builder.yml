@@ -119,21 +119,27 @@ jobs:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+    # ======================================================== #
+    # ↓↓↓ 我们替换的代码从这里开始 ↓↓↓
+    # ======================================================== #
+    
+    - name: 上传固件到 Artifacts (Upload Firmware to Artifacts)
+      uses: actions/upload-artifact@v3
+      # 仅在编译成功时才执行
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
-        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+        # 这是您最后下载的 .zip 文件的名字
+        name: OpenWrt-Firmware-Redmi-AX6000
+        
+        # 这是最关键的一步：
+        # 我们明确告诉它，您要的固件在哪个路径，叫什么名字
+        # (openwrt/bin/targets/ 路径是基于您的机型 'mediatek/filogic')
+        path: openwrt/bin/targets/mediatek/filogic/*-sysupgrade.bin
+
+    # ======================================================== #
+    # ↑↑↑ 我们替换的代码在这里结束 ↑↑↑
+    # (注意：我们删除了 'Organize files' 和 'Upload firmware directory' 两个旧步骤)
+    # ======================================================== #
 
     - name: Generate release tag
       id: tag
