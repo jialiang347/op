@@ -112,15 +112,9 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    - name: Upload bin directory
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
-
     # ======================================================== #
     # ↓↓↓ 我们替换的代码从这里开始 ↓↓↓
+    # (注意: 我已经把那个旧的 'Upload bin directory' 彻底删除了)
     # ======================================================== #
     
     - name: 上传固件到 Artifacts (Upload Firmware to Artifacts)
@@ -138,7 +132,6 @@ jobs:
 
     # ======================================================== #
     # ↑↑↑ 我们替换的代码在这里结束 ↑↑↑
-    # (注意：我们删除了 'Organize files' 和 'Upload firmware directory' 两个旧步骤)
     # ======================================================== #
 
     - name: Generate release tag
