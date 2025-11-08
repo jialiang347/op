@@ -119,7 +119,8 @@ jobs:
     # ======================================================== #
     
     - name: 上传固件到 Artifacts (Upload Firmware to Artifacts)
-      uses: actions/upload-artifact@v3
+      # 唯一的改动：v3 -> v4
+      uses: actions/upload-artifact@v4
       # 仅在编译成功时才执行
       if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
