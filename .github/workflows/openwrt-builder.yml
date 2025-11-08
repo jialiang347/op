@@ -33,7 +33,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Free up disk space on runner (打扫卫生)
+    # ======================================================== #
+    # ↓↓↓ 我们唯一的改动在这里 ↓↓↓
+    # ======================================================== #
+    - name: Free up disk space on runner (野蛮打扫卫生)
       run: |
         echo "===== 磁盘空间 - 打扫前 ====="
         df -h
@@ -41,8 +44,16 @@ jobs:
         sudo rm -rf /opt/ghc
         sudo rm -rf /usr/local/lib/android
         sudo rm -rf /usr/share/swift
+        # --- 新增的“野蛮”清理 ---
+        sudo rm -rf /opt/hostedtoolcache
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf $AGENT_TOOLSDIRECTORY
         echo "===== 磁盘空间 - 打扫后 ====="
         df -h
+    # ======================================================== #
+    # ↑↑↑ 我们唯一的改动在这里结束 ↑↑↑
+    # ======================================================== #
+
     - name: Checkout
       uses: actions/checkout@main
 
@@ -112,33 +123,15 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    # ======================================================== #
-    # ↓↓↓ 我们替换的代码从这里开始 ↓↓↓
-    # (注意: 我已经把 'Upload bin directory', 'Organize files' 
-    # 和 'Upload firmware directory' 全部删除了)
-    # ======================================================== #
-    
     - name: 上传固件到 Artifacts (Upload Firmware to Artifacts)
-      # 唯一的改动：v3 -> v4
       uses: actions/upload-artifact@v4
-      # 仅在编译成功时才执行
       if: steps.compile.outputs.status == 'success' && !cancelled()
       with:
-        # 这是您最后下载的 .zip 文件的名字
         name: OpenWrt-Firmware-Redmi-AX6000
-        
-        # 这是最关键的一步：
-        # 我们明确告诉它，您要的固件在哪个路径，叫什么名字
-        # (openwrt/bin/targets/ 路径是基于您的机型 'mediatek/filogic')
         path: openwrt/bin/targets/mediatek/filogic/*-sysupgrade.bin
-
-    # ======================================================== #
-    # ↑↑↑ 我们替换的代码在这里结束 ↑↑↑
-    # ======================================================== #
 
     - name: Generate release tag
       id: tag
-      # 我们禁用这个多余的步骤，在 if 条件里加一个 'false'
       if: env.UPLOAD_RELEASE == 'true' && !cancelled() && false
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
@@ -148,7 +141,6 @@ jobs:
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@master
-      # 我们禁用这个多余的步骤
       if: steps.tag.outputs.status == 'success' && !cancelled() && false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -165,7 +157,6 @@ jobs:
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@master
-      # 我们禁用这个多余的步骤
       if: env.UPLOAD_RELEASE == 'true' && !cancelled() && false
       with:
         keep_latest: 3
