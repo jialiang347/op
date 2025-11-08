@@ -115,6 +115,7 @@ jobs:
     # ======================================================== #
     # ↓↓↓ 我们替换的代码从这里开始 ↓↓↓
     # (注意: 我已经把那个旧的 'Upload bin directory' 彻底删除了)
+    # (也删除了 'Organize files' 和 'Upload firmware directory')
     # ======================================================== #
     
     - name: 上传固件到 Artifacts (Upload Firmware to Artifacts)
